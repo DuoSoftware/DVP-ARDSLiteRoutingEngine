@@ -10,9 +10,9 @@ import (
 	"time"
 )
 
-func SingleResourceAlgo(ardsLbIp, ardsLbPort, serverType, requestType, sessionId string, selectedResources SelectionResult, reqCompany, reqTenant int) string {
-	var result = SingleHandling(ardsLbIp, ardsLbPort, serverType, requestType, sessionId, selectedResources, reqCompany, reqTenant)
-	return result
+func SingleResourceAlgo(ardsLbIp, ardsLbPort, serverType, requestType, sessionId string, selectedResources SelectedResource, reqCompany, reqTenant int) (handlingResult, handlingResource string) {
+	handlingResult, handlingResource = SingleHandling(ardsLbIp, ardsLbPort, serverType, requestType, sessionId, selectedResources, reqCompany, reqTenant)
+	return
 
 }
 
@@ -120,5 +120,28 @@ func GetResourceState(_company, _tenant int, _resId string) (state string, mode 
 	json.Unmarshal([]byte(strResStateObj), &resStatus)
 	state = resStatus.State
 	mode = resStatus.Mode
+	return
+}
+
+func HandlingResources(Company, Tenant, ResourceCount int, ArdsLbIp, ArdsLbPort, SessionId, ServerType, RequestType, HandlingAlgo, OtherInfo string, selectedResources SelectedResource) (handlingResult string, handlingResource []string) {
+
+	handlingResult = ""
+	handlingResource = make([]string, 0)
+
+	switch HandlingAlgo {
+	case "SINGLE":
+		var singleHandlingResource string
+		handlingResult, singleHandlingResource = SingleResourceAlgo(ArdsLbIp, ArdsLbPort, ServerType, RequestType, SessionId, selectedResources, Company, Tenant)
+		handlingResource = append(handlingResource, singleHandlingResource)
+	case "MULTIPLE":
+		fmt.Println("ReqOtherInfo:", OtherInfo)
+		resCount := ResourceCount
+		fmt.Println("GetRequestedResCount:", resCount)
+		handlingResult, handlingResource = MultipleHandling(ArdsLbIp, ArdsLbPort, ServerType, RequestType, SessionId, selectedResources, resCount, Company, Tenant)
+	default:
+		handlingResult = ""
+		handlingResource = make([]string, 0)
+	}
+
 	return
 }

@@ -6,12 +6,13 @@ import (
 	"strings"
 )
 
-func MultipleHandling(ardsLbIp, ardsLbPort, ServerType, RequestType, sessionId string, selectedResources SelectionResult, nuOfResRequested, reqCompany, reqTenant int) string {
+func MultipleHandling(ardsLbIp, ardsLbPort, ServerType, RequestType, sessionId string, selectedResources SelectedResource, nuOfResRequested, reqCompany, reqTenant int) (handlingResult string, handlingResource []string) {
 	return SelectMultipleHandlingResource(ardsLbIp, ardsLbPort, ServerType, RequestType, sessionId, selectedResources, nuOfResRequested, reqCompany, reqTenant)
 }
 
-func SelectMultipleHandlingResource(ardsLbIp, ardsLbPort, ServerType, RequestType, sessionId string, selectedResources SelectionResult, nuOfResRequested, reqCompany, reqTenant int) string {
+func SelectMultipleHandlingResource(ardsLbIp, ardsLbPort, ServerType, RequestType, sessionId string, selectedResources SelectedResource, nuOfResRequested, reqCompany, reqTenant int) (handlingResult string, handlingResource []string) {
 	selectedResList := make([]string, 0)
+	selectedResKeyList := make([]string, 0)
 	resourceIds := append(selectedResources.Priority, selectedResources.Threshold...)
 	fmt.Println("///////////////////////////////////////selectedResources/////////////////////////////////////////////////")
 	fmt.Println("Priority:: ", selectedResources.Priority)
@@ -63,14 +64,17 @@ func SelectMultipleHandlingResource(ardsLbIp, ardsLbPort, ServerType, RequestTyp
 							slotObj.OtherInfo = "Inbound"
 							slotObj.MaxReservedTime = metaData.MaxReservedTime
 							slotObj.MaxAfterWorkTime = metaData.MaxAfterWorkTime
+							slotObj.MaxFreezeTime = metaData.MaxFreezeTime
 							slotObj.TempMaxRejectCount = metaData.MaxRejectCount
 
 							if ReserveSlot(ardsLbIp, ardsLbPort, slotObj) == true {
 								fmt.Println("Return resource Data:", conInfo.RefInfo)
 								selectedResList = AppendIfMissingString(selectedResList, conInfo.RefInfo)
+								selectedResKeyList = AppendIfMissingString(selectedResKeyList, key)
 								if len(selectedResList) == nuOfResRequested {
 									selectedResListString, _ := json.Marshal(selectedResList)
-									return string(selectedResListString)
+									handlingResult = string(selectedResListString)
+									handlingResource = selectedResKeyList
 								}
 							}
 						}
@@ -80,5 +84,7 @@ func SelectMultipleHandlingResource(ardsLbIp, ardsLbPort, ServerType, RequestTyp
 		}
 
 	}
-	return "No matching resources at the moment"
+	handlingResult = "No matching resources at the moment"
+	handlingResource = make([]string, 0)
+	return
 }

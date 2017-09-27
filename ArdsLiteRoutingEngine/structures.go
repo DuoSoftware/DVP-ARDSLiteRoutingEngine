@@ -14,6 +14,12 @@ type Configuration struct {
 	RabbitMQUser     string
 	RabbitMQPassword string
 	AccessToken      string
+	UseMsgQueue      bool
+	RoutingEngineId  string
+	RedisMode        string
+	RedisClusterName string
+	SentinelHosts    string
+	SentinelPort     string
 }
 
 type EnvConfiguration struct {
@@ -28,6 +34,12 @@ type EnvConfiguration struct {
 	RabbitMQUser     string
 	RabbitMQPassword string
 	AccessToken      string
+	UseMsgQueue      string
+	RoutingEngineId  string
+	RedisMode        string
+	RedisClusterName string
+	SentinelHosts    string
+	SentinelPort     string
 }
 
 //Request
@@ -85,6 +97,7 @@ type ReqMetaData struct {
 	MaxReservedTime  int
 	MaxRejectCount   int
 	MaxAfterWorkTime int
+	MaxFreezeTime    int
 }
 
 //Resource
@@ -125,6 +138,7 @@ type CSlotInfo struct {
 	LastReservedTime   string
 	MaxReservedTime    int
 	MaxAfterWorkTime   int
+	MaxFreezeTime      int
 	TempMaxRejectCount int
 	OtherInfo          string
 }
@@ -142,6 +156,7 @@ type ConcurrencyInfo struct {
 type WeightBaseResourceInfo struct {
 	ResourceId string
 	Weight     float64
+	LastConnectedTime   string
 }
 
 type MultiResCount struct {
@@ -152,7 +167,12 @@ type updateCsReult struct {
 	IsSuccess bool
 }
 
-type SelectionResult struct {
+type SelectedResource struct  {
 	Priority  []string
 	Threshold []string
+}
+
+type SelectionResult struct {
+	Request string
+	Resources SelectedResource
 }

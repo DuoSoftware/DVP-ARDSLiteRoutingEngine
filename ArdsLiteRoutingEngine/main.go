@@ -15,26 +15,36 @@ func main() {
 	fmt.Println("Starting Ards Route Engine")
 	InitiateRedis()
 	go InitiateService()
-	//for {
-	//	Worker()
-	//	fmt.Println("End Worker()")
-	//	time.Sleep(2 * time.Second)
-	//}
-	for {
-		//fmt.Println("Searching...")
-		availablePHashes := GetAllProcessingHashes()
-		if len(availablePHashes) > 0 {
-			for _, h := range availablePHashes {
-				u1 := uuid.NewV4()
-				if AcquireProcessingHashLock(h, u1.String()) == true {
-					go ExecuteRequestHash(h, u1.String())
+
+	if useMsgQueue {
+		//-------------------Amqp Based Routing---------------------------------------
+		for {
+			Worker()
+			fmt.Println("End Worker()")
+			time.Sleep(2 * time.Second)
+		}
+	} else {
+		//-------------------RedisDb Based Routing---------------------------------------
+		for {
+
+			pubChannelName := fmt.Sprintf("RoutingChannel:%s", routingEngineId)
+			if RoutingEngineDistribution(pubChannelName) == pubChannelName {
+				availablePHashes := GetAllProcessingHashes()
+				if len(availablePHashes) > 0 {
+					for _, h := range availablePHashes {
+						u1 := uuid.NewV4()
+						if AcquireProcessingHashLock(h, u1.String()) == true {
+							go ExecuteRequestHash(h, u1.String())
+						}
+					}
+				} else {
+					fmt.Println("No Processing Hash Found...")
 				}
 			}
-		} else {
-			fmt.Println("No Processing Hash Found...")
+			time.Sleep(1 * time.Second)
 		}
-		time.Sleep(1 * time.Second)
 	}
+
 }
 
 func InitiateService() {

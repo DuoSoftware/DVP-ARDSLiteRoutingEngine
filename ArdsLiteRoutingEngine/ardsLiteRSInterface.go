@@ -32,31 +32,22 @@ func (ardsLiteRs ArdsLiteRS) GetResource(Company, Tenant, ResourceCount int, Ses
 		var reqObj Request
 		json.Unmarshal([]byte(strReqObj), &reqObj)
 
-		var result = SelectResources(Company, Tenant, ResourceCount, reqObj.LbIp, reqObj.LbPort, SessionId, ServerType, RequestType, SelectionAlgo, HandlingAlgo, otherInfo)
+		tempRequestArray := make([]Request, 1)
+		tempRequestArray[0] = reqObj
+
+		pickedResources := make([]string, 0)
+
+		selectedResources := SelectResources(Company, Tenant, tempRequestArray, SelectionAlgo)
+		resourceForRequest, _ := GetSelectedResourceForRequest(selectedResources, reqObj.SessionId, pickedResources)
+		result, _ := HandlingResources(Company, Tenant, ResourceCount, reqObj.LbIp, reqObj.LbPort, SessionId, ServerType, RequestType, HandlingAlgo, otherInfo, resourceForRequest)
 		return result
 	}
 	return "Session Invalied"
 
 }
 
-/*func GetRequestedResCount(ReqOtherInfo string) int {
-	fmt.Println("ReqOtherInfo:", ReqOtherInfo)
-	var requestedResCount = 1
 
-	var resCount MultiResCount
-	err := json.Unmarshal([]byte(ReqOtherInfo), &resCount)
-
-	if err != nil {
-		println(err)
-		requestedResCount = 1
-	} else {
-		requestedResCount = resCount.ResourceCount
-	}
-
-	return requestedResCount
-}*/
-
-func SelectResources(Company, Tenant, ResourceCount int, ArdsLbIp, ArdsLbPort, SessionId, ServerType, RequestType, SelectionAlgo, HandlingAlgo, OtherInfo string) string {
+/*func SelectResources(Company, Tenant, ResourceCount int, ArdsLbIp, ArdsLbPort, SessionId, ServerType, RequestType, SelectionAlgo, HandlingAlgo, OtherInfo string) string {
 	var selectionResult SelectionResult
 	var handlingResult = ""
 	switch SelectionAlgo {
@@ -89,4 +80,4 @@ func SelectResources(Company, Tenant, ResourceCount int, ArdsLbIp, ArdsLbPort, S
 	}
 
 	return handlingResult
-}
+}*/

@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/satori/go.uuid"
 	"github.com/streadway/amqp"
 	"log"
 )
@@ -91,8 +92,9 @@ func Worker() {
 				log.Printf("Received a message: %s", d.Body)
 				d.Ack(false)
 				hashKey := string(d.Body)
-				if AcquireProcessingHashLock(hashKey, "test") == true {
-					go ExecuteRequestHash(hashKey, "test")
+				u1 := uuid.NewV4()
+				if AcquireProcessingHashLock(hashKey, u1.String()) == true {
+					go ExecuteRequestHashWithMsgQueue(hashKey, u1.String())
 				}
 				//dot_count := bytes.Count(d.Body, []byte("."))
 				//t := time.Duration(dot_count)

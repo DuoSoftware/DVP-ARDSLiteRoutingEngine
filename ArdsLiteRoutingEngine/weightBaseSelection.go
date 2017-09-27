@@ -83,23 +83,31 @@ func WeightBaseSelection(_company, _tenent int, _sessionId string) (result Selec
 			json.Unmarshal([]byte(strResObj), &resObj)
 
 			if resObj.ResourceId != "" {
+				concInfo, err := GetConcurrencyInfo(resObj.Company, resObj.Tenant, resObj.ResourceId, reqObj.RequestType)
+				if err != nil {
+					fmt.Println("Error in GetConcurrencyInfo")
+				}
 				calcWeight := CalculateWeight(reqObj.AttributeInfo, resObj.ResourceAttributeInfo)
 				resKey := fmt.Sprintf("Resource:%d:%d:%s", resObj.Company, resObj.Tenant, resObj.ResourceId)
 				var tempWeightInfo WeightBaseResourceInfo
 				tempWeightInfo.ResourceId = resKey
 				tempWeightInfo.Weight = calcWeight
+				tempWeightInfo.LastConnectedTime=concInfo.LastConnectedTime
 
 				resourceWeightInfo = append(resourceWeightInfo, tempWeightInfo)
 			}
+
 		}
 
-		sort.Sort(ByNumericValue(resourceWeightInfo))
+		//sort.Sort(ByNumericValue(resourceWeightInfo))
+		sort.Sort(ByWaitingTime(resourceWeightInfo))
 
 		for _, res := range resourceWeightInfo {
 			matchingResources = AppendIfMissingString(matchingResources, res.ResourceId)
 			logWeight := fmt.Sprintf("###################################### %s --------- %f", res.ResourceId, res.Weight)
 			fmt.Println(logWeight)
 		}
+
 
 	}
 	result.Priority = matchingResources

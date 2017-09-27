@@ -9,5 +9,11 @@
 	"RabbitMQPort": "SYS_RABBITMQ_PORT",
 	"RabbitMQUser": "SYS_RABBITMQ_USER",
 	"RabbitMQPassword":"SYS_RABBITMQ_PASSWORD",
-	"AccessToken":"HOST_TOKEN"
+	"UseMsgQueue": "HOST_USE_MSG_QUEUE",
+	"AccessToken":"HOST_TOKEN",
+	"RoutingEngineId": "HOST_ARDSLITEROUTINGENGINE_ID",
+	"RedisMode":"SYS_REDIS_MODE",
+	"RedisClusterName":"SYS_REDIS_SENTINEL_NAME",
+	"SentinelHosts": "SYS_REDIS_SENTINEL_HOSTS",
+	"SentinelPort": "SYS_REDIS_SENTINEL_PORT"
 }
